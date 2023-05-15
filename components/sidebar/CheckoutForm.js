@@ -1,10 +1,12 @@
-import { useTestMutation } from '@/saleor/api';
+import { useShippingMethodQuery, useTestMutation } from '@/saleor/api';
 import React, { useState } from 'react'
 import Router from 'next/router';
 
 function CheckoutForm() {
 
 const products = JSON.parse(Router.query.data);
+
+const [Ctoken, setCtoken] = useState();
 
 const initialCheckoutValues = {                
     email: '',
@@ -21,6 +23,15 @@ const initialCheckoutValues = {
 
 const [values, setValues] = useState(initialCheckoutValues);  
 
+const shippingFunc = async (ctoken) => {
+  const {loading, error, data } = await useShippingMethodQuery({
+    variables : {
+      'ctoken' : ctoken
+    }
+  })
+  console.log(data);
+}
+
 const handleChange = (e) => {                
   setValues({
       ...values,                               
@@ -28,12 +39,12 @@ const handleChange = (e) => {
   });
   };
 
-const [checkoutCreate, { loading, error }] = useTestMutation()
+const [checkoutCreate, { loading, error }] = useTestMutation();
 
 const handleButtonClick = async () => {
    console.log(values);
   // Call the mutation on button click
-  await checkoutCreate({ variables:  {
+  let result = await checkoutCreate({ variables:  {  
     "email" : values.email,
     "variantId" : products[0]?.variant?.id,
     "quantity": 1,
@@ -42,17 +53,17 @@ const handleButtonClick = async () => {
     "streetAddress1": values.streetAddress1,
     "city" : values.city,
     "postalCode": values.postalCode,
-    "country" : 'US',
-    "countryArea": "MI"
+    "country" : 'IN',
+    "countryArea": "delhi"
   }  })
-    .then((result) => {
       // Handle success
       console.log('Mutation result:', result);
-    })
-    .catch((error) => {
-      // Handle error
-      console.error('Mutation error:', error);
-    });
+      const ctoken = result?.data?.checkoutCreate?.checkout?.token;
+      console.log(ctoken);
+ 
+
+      let shippingResult = await shippingFunc(ctoken);
+
 };
   return (
     <div>

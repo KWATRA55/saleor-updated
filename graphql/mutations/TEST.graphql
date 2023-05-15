@@ -3,7 +3,7 @@ mutation test($email : String!, $quantity: Int!, $variantId : ID!,
     ,$postalCode : String!, $country : CountryCode!, $countryArea : String!  ){
   checkoutCreate(
     input: {
-      channel: "default-channel"
+      channel: "in"
       email: $email
       lines: [{ quantity: $quantity, variantId: $variantId }]
       shippingAddress: {
@@ -28,6 +28,7 @@ mutation test($email : String!, $quantity: Int!, $variantId : ID!,
   ) {
     checkout {
       id
+      token
       totalPrice {
         gross {
           amount
