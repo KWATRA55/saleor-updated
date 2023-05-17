@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useCheckoutDeliveryMethodUpdateMutation } from "@/saleor/api";
 import Router from "next/router";
+
 
 function selectmethod() {
   const { ctoken, dID } = Router.query;
@@ -9,18 +10,29 @@ function selectmethod() {
 
   const [checkoutDeliveryMethodUpdate, { loading, error }] =
   useCheckoutDeliveryMethodUpdateMutation();
-  const { data } = checkoutDeliveryMethodUpdate({
-    variables: {
-      "dId": dID,
-      "ctoken": ctoken,
-      locale: "EN"
-    },
-  });
-  console.log("selectmethod data : ", data);
 
-  if (data) {
-    Router.push({ pathname: "/payment", query: { ctoken } }, "/payment");
-  }
+  useEffect(() => {
+    const updateDeliveryMethod = async () => {
+      try {
+        const { data } = await checkoutDeliveryMethodUpdate({
+          variables: {
+            dId: dID,
+            ctoken: ctoken,
+            locale: "EN",
+          },
+        });
+        console.log("selectmethod data: ", data);
+        if (data) {
+          Router.push({ pathname: "/paymentcreate", query: { ctoken } }, "/paymentcreate");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    updateDeliveryMethod();
+  }, [checkoutDeliveryMethodUpdate, ctoken, dID]);
+
 
   return <div>select method</div>;
 }
