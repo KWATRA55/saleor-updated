@@ -12,7 +12,7 @@ function shippingmethod() {
           'ctoken' : ctoken
         }
       })
-      const dID = data?.checkout?.shippingMethods[0].id;
+      const dID = data?.checkout?.availableCollectionPoints[0].id;
       console.log(dID);
 
       if(dID){
