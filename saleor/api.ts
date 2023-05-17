@@ -142,6 +142,12 @@ export type AccountInput = {
   languageCode?: InputMaybe<LanguageCodeEnum>;
   /** Family name. */
   lastName?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
 };
 
 /** Register a new user. */
@@ -3350,6 +3356,63 @@ export type CheckoutCreate = {
   errors: Array<CheckoutError>;
 };
 
+/**
+ * Create new checkout from existing order.
+ *
+ * Added in Saleor 3.14.
+ *
+ * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+ */
+export type CheckoutCreateFromOrder = {
+  __typename?: 'CheckoutCreateFromOrder';
+  /** Created checkout. */
+  checkout?: Maybe<Checkout>;
+  errors: Array<CheckoutCreateFromOrderError>;
+  /** Variants that were not attached to the checkout. */
+  unavailableVariants?: Maybe<Array<CheckoutCreateFromOrderUnavailableVariant>>;
+};
+
+export type CheckoutCreateFromOrderError = {
+  __typename?: 'CheckoutCreateFromOrderError';
+  /** The error code. */
+  code: CheckoutCreateFromOrderErrorCode;
+  /** Name of a field that caused the error. A value of `null` indicates that the error isn't associated with a particular field. */
+  field?: Maybe<Scalars['String']>;
+  /** The error message. */
+  message?: Maybe<Scalars['String']>;
+};
+
+/** An enumeration. */
+export enum CheckoutCreateFromOrderErrorCode {
+  ChannelInactive = 'CHANNEL_INACTIVE',
+  GraphqlError = 'GRAPHQL_ERROR',
+  Invalid = 'INVALID',
+  OrderNotFound = 'ORDER_NOT_FOUND',
+  TaxError = 'TAX_ERROR'
+}
+
+export type CheckoutCreateFromOrderUnavailableVariant = {
+  __typename?: 'CheckoutCreateFromOrderUnavailableVariant';
+  /** The error code. */
+  code: CheckoutCreateFromOrderUnavailableVariantErrorCode;
+  /** Order line ID that is unavailable. */
+  lineId: Scalars['ID'];
+  /** The error message. */
+  message: Scalars['String'];
+  /** Variant ID that is unavailable. */
+  variantId: Scalars['ID'];
+};
+
+/** An enumeration. */
+export enum CheckoutCreateFromOrderUnavailableVariantErrorCode {
+  InsufficientStock = 'INSUFFICIENT_STOCK',
+  NotFound = 'NOT_FOUND',
+  ProductNotPublished = 'PRODUCT_NOT_PUBLISHED',
+  ProductUnavailableForPurchase = 'PRODUCT_UNAVAILABLE_FOR_PURCHASE',
+  QuantityGreaterThanLimit = 'QUANTITY_GREATER_THAN_LIMIT',
+  UnavailableVariantInChannel = 'UNAVAILABLE_VARIANT_IN_CHANNEL'
+}
+
 export type CheckoutCreateInput = {
   /** Billing address of the customer. */
   billingAddress?: InputMaybe<AddressInput>;
@@ -5061,8 +5124,20 @@ export type CustomerInput = {
   languageCode?: InputMaybe<LanguageCodeEnum>;
   /** Family name. */
   lastName?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** A note about the user. */
   note?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
 };
 
 /**
@@ -7179,10 +7254,26 @@ export type GiftCardUpdated = Event & {
 /** Represents permission group data. */
 export type Group = Node & {
   __typename?: 'Group';
+  /**
+   * List of channels the group has access to.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  accessibleChannels?: Maybe<Array<Channel>>;
   id: Scalars['ID'];
   name: Scalars['String'];
   /** List of group permissions */
   permissions?: Maybe<Array<Permission>>;
+  /**
+   * Determine if the group have restricted access to channels.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  restrictedAccessToChannels: Scalars['Boolean'];
   /** True, if the currently authenticated user has rights to manage a group. */
   userCanManage: Scalars['Boolean'];
   /**
@@ -7326,8 +7417,20 @@ export type InvoiceCreate = {
 };
 
 export type InvoiceCreateInput = {
+  /**
+   * Fields required to update the invoice metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** Invoice number. */
   number: Scalars['String'];
+  /**
+   * Fields required to update the invoice private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
   /** URL of an invoice to download. */
   url: Scalars['String'];
 };
@@ -9456,6 +9559,14 @@ export type Mutation = {
   /** Create a new checkout. */
   checkoutCreate?: Maybe<CheckoutCreate>;
   /**
+   * Create new checkout from existing order.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  checkoutCreateFromOrder?: Maybe<CheckoutCreateFromOrder>;
+  /**
    * Sets the customer as the owner of the checkout.
    *
    * Requires one of the following permissions: AUTHENTICATED_APP, AUTHENTICATED_USER.
@@ -10722,7 +10833,7 @@ export type Mutation = {
   taxExemptionManage?: Maybe<TaxExemptionManage>;
   /** Create JWT token. */
   tokenCreate?: Maybe<CreateToken>;
-  /** Refresh JWT token. Mutation tries to take refreshToken from the input.If it fails it will try to take refreshToken from the http-only cookie -refreshToken. csrfToken is required when refreshToken is provided as a cookie. */
+  /** Refresh JWT token. Mutation tries to take refreshToken from the input. If it fails it will try to take `refreshToken` from the http-only cookie `refreshToken`. `csrfToken` is required when `refreshToken` is provided as a cookie. */
   tokenRefresh?: Maybe<RefreshToken>;
   /** Verify JWT token. */
   tokenVerify?: Maybe<VerifyToken>;
@@ -10917,7 +11028,7 @@ export type Mutation = {
   /**
    * Updates a webhook subscription.
    *
-   * Requires one of the following permissions: MANAGE_APPS.
+   * Requires one of the following permissions: MANAGE_APPS, AUTHENTICATED_APP.
    */
   webhookUpdate?: Maybe<WebhookUpdate>;
 };
@@ -11224,6 +11335,11 @@ export type MutationCheckoutCompleteArgs = {
 
 export type MutationCheckoutCreateArgs = {
   input: CheckoutCreateInput;
+};
+
+
+export type MutationCheckoutCreateFromOrderArgs = {
+  id: Scalars['ID'];
 };
 
 
@@ -13394,6 +13510,7 @@ export type OrderDiscountDelete = {
 /** An enumeration. */
 export enum OrderDiscountType {
   Manual = 'MANUAL',
+  Sale = 'SALE',
   Voucher = 'VOUCHER'
 }
 
@@ -13783,6 +13900,27 @@ export type OrderFulfilled = Event & {
  */
 export type OrderFullyPaid = Event & {
   __typename?: 'OrderFullyPaid';
+  /** Time of the event. */
+  issuedAt?: Maybe<Scalars['DateTime']>;
+  /** The user or application that triggered the event. */
+  issuingPrincipal?: Maybe<IssuingPrincipal>;
+  /** The order the event relates to. */
+  order?: Maybe<Order>;
+  /** The application receiving the webhook. */
+  recipient?: Maybe<App>;
+  /** Saleor version that triggered the event. */
+  version?: Maybe<Scalars['String']>;
+};
+
+/**
+ * The order is fully refunded.
+ *
+ * Added in Saleor 3.14.
+ *
+ * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+ */
+export type OrderFullyRefunded = Event & {
+  __typename?: 'OrderFullyRefunded';
   /** Time of the event. */
   issuedAt?: Maybe<Scalars['DateTime']>;
   /** The user or application that triggered the event. */
@@ -14199,6 +14337,27 @@ export enum OrderOriginEnum {
 }
 
 /**
+ * Payment has been made. The order may be partially or fully paid.
+ *
+ * Added in Saleor 3.14.
+ *
+ * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+ */
+export type OrderPaid = Event & {
+  __typename?: 'OrderPaid';
+  /** Time of the event. */
+  issuedAt?: Maybe<Scalars['DateTime']>;
+  /** The user or application that triggered the event. */
+  issuingPrincipal?: Maybe<IssuingPrincipal>;
+  /** The order the event relates to. */
+  order?: Maybe<Order>;
+  /** The application receiving the webhook. */
+  recipient?: Maybe<App>;
+  /** Saleor version that triggered the event. */
+  version?: Maybe<Scalars['String']>;
+};
+
+/**
  * Refund an order.
  *
  * Requires one of the following permissions: MANAGE_ORDERS.
@@ -14235,6 +14394,27 @@ export type OrderRefundProductsInput = {
   includeShippingCosts?: InputMaybe<Scalars['Boolean']>;
   /** List of unfulfilled lines to refund. */
   orderLines?: InputMaybe<Array<OrderRefundLineInput>>;
+};
+
+/**
+ * The order received a refund. The order may be partially or fully refunded.
+ *
+ * Added in Saleor 3.14.
+ *
+ * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+ */
+export type OrderRefunded = Event & {
+  __typename?: 'OrderRefunded';
+  /** Time of the event. */
+  issuedAt?: Maybe<Scalars['DateTime']>;
+  /** The user or application that triggered the event. */
+  issuingPrincipal?: Maybe<IssuingPrincipal>;
+  /** The order the event relates to. */
+  order?: Maybe<Order>;
+  /** The application receiving the webhook. */
+  recipient?: Maybe<App>;
+  /** Saleor version that triggered the event. */
+  version?: Maybe<Scalars['String']>;
 };
 
 export type OrderReturnFulfillmentLineInput = {
@@ -15921,12 +16101,28 @@ export type PermissionGroupCreate = {
 };
 
 export type PermissionGroupCreateInput = {
+  /**
+   * List of channels to assign to this group.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  addChannels?: InputMaybe<Array<Scalars['ID']>>;
   /** List of permission code names to assign to this group. */
   addPermissions?: InputMaybe<Array<PermissionEnum>>;
   /** List of users to assign to this group. */
   addUsers?: InputMaybe<Array<Scalars['ID']>>;
   /** Group name. */
   name: Scalars['String'];
+  /**
+   * Determine if the group has restricted access to channels.  DEFAULT: False
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  restrictedAccessToChannels?: InputMaybe<Scalars['Boolean']>;
 };
 
 /**
@@ -15982,6 +16178,8 @@ export type PermissionGroupDeleted = Event & {
 
 export type PermissionGroupError = {
   __typename?: 'PermissionGroupError';
+  /** List of chnnels IDs which causes the error. */
+  channels?: Maybe<Array<Scalars['ID']>>;
   /** The error code. */
   code: PermissionGroupErrorCode;
   /** Name of a field that caused the error. A value of `null` indicates that the error isn't associated with a particular field. */
@@ -16000,6 +16198,7 @@ export enum PermissionGroupErrorCode {
   CannotRemoveFromLastGroup = 'CANNOT_REMOVE_FROM_LAST_GROUP',
   DuplicatedInputItem = 'DUPLICATED_INPUT_ITEM',
   LeftNotManageablePermission = 'LEFT_NOT_MANAGEABLE_PERMISSION',
+  OutOfScopeChannel = 'OUT_OF_SCOPE_CHANNEL',
   OutOfScopePermission = 'OUT_OF_SCOPE_PERMISSION',
   OutOfScopeUser = 'OUT_OF_SCOPE_USER',
   Required = 'REQUIRED',
@@ -16038,16 +16237,40 @@ export type PermissionGroupUpdate = {
 };
 
 export type PermissionGroupUpdateInput = {
+  /**
+   * List of channels to assign to this group.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  addChannels?: InputMaybe<Array<Scalars['ID']>>;
   /** List of permission code names to assign to this group. */
   addPermissions?: InputMaybe<Array<PermissionEnum>>;
   /** List of users to assign to this group. */
   addUsers?: InputMaybe<Array<Scalars['ID']>>;
   /** Group name. */
   name?: InputMaybe<Scalars['String']>;
+  /**
+   * List of channels to unassign from this group.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  removeChannels?: InputMaybe<Array<Scalars['ID']>>;
   /** List of permission code names to unassign from this group. */
   removePermissions?: InputMaybe<Array<PermissionEnum>>;
   /** List of users to unassign from this group. */
   removeUsers?: InputMaybe<Array<Scalars['ID']>>;
+  /**
+   * Determine if the group has restricted access to channels.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  restrictedAccessToChannels?: InputMaybe<Scalars['Boolean']>;
 };
 
 /**
@@ -18278,6 +18501,12 @@ export type ProductVariantBulkError = {
   /** The error message. */
   message?: Maybe<Scalars['String']>;
   /**
+   * Path to field that caused the error. A value of `null` indicates that the error isn't associated with a particular field.
+   *
+   * Added in Saleor 3.14.
+   */
+  path?: Maybe<Scalars['String']>;
+  /**
    * List of stocks IDs which causes the error.
    *
    * Added in Saleor 3.12.
@@ -18974,7 +19203,11 @@ export type Query = {
   __typename?: 'Query';
   _entities?: Maybe<Array<Maybe<_Entity>>>;
   _service?: Maybe<_Service>;
-  /** Look up an address by ID. */
+  /**
+   * Look up an address by ID.
+   *
+   * Requires one of the following permissions: MANAGE_USERS, OWNER.
+   */
   address?: Maybe<Address>;
   /** Returns address validation rules. */
   addressValidationRules?: Maybe<AddressValidationData>;
@@ -19963,7 +20196,7 @@ export type ReducedRate = {
   rateType: Scalars['String'];
 };
 
-/** Refresh JWT token. Mutation tries to take refreshToken from the input.If it fails it will try to take refreshToken from the http-only cookie -refreshToken. csrfToken is required when refreshToken is provided as a cookie. */
+/** Refresh JWT token. Mutation tries to take refreshToken from the input. If it fails it will try to take `refreshToken` from the http-only cookie `refreshToken`. `csrfToken` is required when `refreshToken` is provided as a cookie. */
 export type RefreshToken = {
   __typename?: 'RefreshToken';
   /** @deprecated This field will be removed in Saleor 4.0. Use `errors` field instead. */
@@ -21931,8 +22164,20 @@ export type StaffCreateInput = {
   isActive?: InputMaybe<Scalars['Boolean']>;
   /** Family name. */
   lastName?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** A note about the user. */
   note?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
   /** URL of a view where users should be redirected to set the password. URL in RFC 1808 format. */
   redirectUrl?: InputMaybe<Scalars['String']>;
 };
@@ -22099,8 +22344,20 @@ export type StaffUpdateInput = {
   isActive?: InputMaybe<Scalars['Boolean']>;
   /** Family name. */
   lastName?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** A note about the user. */
   note?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
   /** List of permission group IDs from which user should be unassigned. */
   removeGroups?: InputMaybe<Array<Scalars['ID']>>;
 };
@@ -24115,8 +24372,20 @@ export type TranslationUpdated = Event & {
 };
 
 export type UpdateInvoiceInput = {
+  /**
+   * Fields required to update the invoice metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** Invoice number */
   number?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the invoice private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
   /** URL of an invoice to download. */
   url?: InputMaybe<Scalars['String']>;
 };
@@ -24157,6 +24426,14 @@ export enum UploadErrorCode {
 /** Represents user data. */
 export type User = Node & ObjectWithMetadata & {
   __typename?: 'User';
+  /**
+   * List of channels the user has access to. The sum of channels from all user groups. If at least one group has `restrictedAccessToChannels` set to False - all channels are returned.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  accessibleChannels?: Maybe<Array<Channel>>;
   /** List of all user's addresses. */
   addresses: Array<Address>;
   avatar?: Maybe<Image>;
@@ -24256,6 +24533,14 @@ export type User = Node & ObjectWithMetadata & {
    * Note: this API is currently in Feature Preview and can be subject to changes at later point.
    */
   privateMetafields?: Maybe<Scalars['Metadata']>;
+  /**
+   * Determine if user have restricted access to channels. False if at least one user group has `restrictedAccessToChannels` set to False.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  restrictedAccessToChannels: Scalars['Boolean'];
   /** List of stored payment sources. */
   storedPaymentSources?: Maybe<Array<PaymentSource>>;
   updatedAt: Scalars['DateTime'];
@@ -24422,8 +24707,20 @@ export type UserCreateInput = {
   languageCode?: InputMaybe<LanguageCodeEnum>;
   /** Family name. */
   lastName?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  metadata?: InputMaybe<Array<MetadataInput>>;
   /** A note about the user. */
   note?: InputMaybe<Scalars['String']>;
+  /**
+   * Fields required to update the user private metadata.
+   *
+   * Added in Saleor 3.14.
+   */
+  privateMetadata?: InputMaybe<Array<MetadataInput>>;
   /** URL of a view where users should be redirected to set the password. URL in RFC 1808 format. */
   redirectUrl?: InputMaybe<Scalars['String']>;
 };
@@ -25843,11 +26140,35 @@ export enum WebhookEventTypeAsyncEnum {
   /** Payment is made and an order is fully paid. */
   OrderFullyPaid = 'ORDER_FULLY_PAID',
   /**
+   * The order is fully refunded.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderFullyRefunded = 'ORDER_FULLY_REFUNDED',
+  /**
    * An order metadata is updated.
    *
    * Added in Saleor 3.8.
    */
   OrderMetadataUpdated = 'ORDER_METADATA_UPDATED',
+  /**
+   * Payment has been made. The order may be partially or fully paid.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderPaid = 'ORDER_PAID',
+  /**
+   * The order received a refund. The order may be partially or fully refunded.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderRefunded = 'ORDER_REFUNDED',
   /** An order is updated; triggered for all changes related to an order; covers all other order webhooks, except for ORDER_CREATED. */
   OrderUpdated = 'ORDER_UPDATED',
   /** A new page is created. */
@@ -26166,11 +26487,35 @@ export enum WebhookEventTypeEnum {
   /** Payment is made and an order is fully paid. */
   OrderFullyPaid = 'ORDER_FULLY_PAID',
   /**
+   * The order is fully refunded.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderFullyRefunded = 'ORDER_FULLY_REFUNDED',
+  /**
    * An order metadata is updated.
    *
    * Added in Saleor 3.8.
    */
   OrderMetadataUpdated = 'ORDER_METADATA_UPDATED',
+  /**
+   * Payment has been made. The order may be partially or fully paid.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderPaid = 'ORDER_PAID',
+  /**
+   * The order received a refund. The order may be partially or fully refunded.
+   *
+   * Added in Saleor 3.14.
+   *
+   * Note: this API is currently in Feature Preview and can be subject to changes at later point.
+   */
+  OrderRefunded = 'ORDER_REFUNDED',
   /** An order is updated; triggered for all changes related to an order; covers all other order webhooks, except for ORDER_CREATED. */
   OrderUpdated = 'ORDER_UPDATED',
   /** A new page is created. */
@@ -26489,7 +26834,10 @@ export enum WebhookSampleEventTypeEnum {
   OrderExpired = 'ORDER_EXPIRED',
   OrderFulfilled = 'ORDER_FULFILLED',
   OrderFullyPaid = 'ORDER_FULLY_PAID',
+  OrderFullyRefunded = 'ORDER_FULLY_REFUNDED',
   OrderMetadataUpdated = 'ORDER_METADATA_UPDATED',
+  OrderPaid = 'ORDER_PAID',
+  OrderRefunded = 'ORDER_REFUNDED',
   OrderUpdated = 'ORDER_UPDATED',
   PageCreated = 'PAGE_CREATED',
   PageDeleted = 'PAGE_DELETED',
@@ -26585,7 +26933,7 @@ export enum WebhookTriggerErrorCode {
 /**
  * Updates a webhook subscription.
  *
- * Requires one of the following permissions: MANAGE_APPS.
+ * Requires one of the following permissions: MANAGE_APPS, AUTHENTICATED_APP.
  */
 export type WebhookUpdate = {
   __typename?: 'WebhookUpdate';
@@ -26774,6 +27122,14 @@ export type CheckoutPaymentCreateMutationVariables = Exact<{
 
 
 export type CheckoutPaymentCreateMutation = { __typename?: 'Mutation', checkoutPaymentCreate?: { __typename?: 'CheckoutPaymentCreate', payment?: { __typename?: 'Payment', id: string, total?: { __typename?: 'Money', currency: string, amount: number } | null } | null, errors: Array<{ __typename?: 'PaymentError', field?: string | null, message?: string | null }> } | null };
+
+export type CheckoutDeliveryMethodUpdateMutationVariables = Exact<{
+  ctoken: Scalars['UUID'];
+  dId: Scalars['ID'];
+}>;
+
+
+export type CheckoutDeliveryMethodUpdateMutation = { __typename?: 'Mutation', checkoutDeliveryMethodUpdate?: { __typename?: 'CheckoutDeliveryMethodUpdate', checkout?: { __typename?: 'Checkout', token: any, deliveryMethod?: { __typename: 'ShippingMethod', name: string } | { __typename: 'Warehouse', name: string } | null, totalPrice: { __typename?: 'TaxedMoney', gross: { __typename?: 'Money', amount: number, currency: string } } } | null, errors: Array<{ __typename?: 'CheckoutError', field?: string | null, message?: string | null }> } | null };
 
 export type CheckoutEmailUpdateMutationVariables = Exact<{
   token: Scalars['UUID'];
@@ -27970,6 +28326,61 @@ export function useCheckoutPaymentCreateMutation(baseOptions?: Apollo.MutationHo
 export type CheckoutPaymentCreateMutationHookResult = ReturnType<typeof useCheckoutPaymentCreateMutation>;
 export type CheckoutPaymentCreateMutationResult = Apollo.MutationResult<CheckoutPaymentCreateMutation>;
 export type CheckoutPaymentCreateMutationOptions = Apollo.BaseMutationOptions<CheckoutPaymentCreateMutation, CheckoutPaymentCreateMutationVariables>;
+export const CheckoutDeliveryMethodUpdateDocument = gql`
+    mutation checkoutDeliveryMethodUpdate($ctoken: UUID!, $dId: ID!) {
+  checkoutDeliveryMethodUpdate(token: $ctoken, deliveryMethodId: $dId) {
+    checkout {
+      token
+      deliveryMethod {
+        __typename
+        ... on Warehouse {
+          name
+        }
+        ... on ShippingMethod {
+          name
+        }
+      }
+      totalPrice {
+        gross {
+          amount
+          currency
+        }
+      }
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+    `;
+export type CheckoutDeliveryMethodUpdateMutationFn = Apollo.MutationFunction<CheckoutDeliveryMethodUpdateMutation, CheckoutDeliveryMethodUpdateMutationVariables>;
+
+/**
+ * __useCheckoutDeliveryMethodUpdateMutation__
+ *
+ * To run a mutation, you first call `useCheckoutDeliveryMethodUpdateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCheckoutDeliveryMethodUpdateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [checkoutDeliveryMethodUpdateMutation, { data, loading, error }] = useCheckoutDeliveryMethodUpdateMutation({
+ *   variables: {
+ *      ctoken: // value for 'ctoken'
+ *      dId: // value for 'dId'
+ *   },
+ * });
+ */
+export function useCheckoutDeliveryMethodUpdateMutation(baseOptions?: Apollo.MutationHookOptions<CheckoutDeliveryMethodUpdateMutation, CheckoutDeliveryMethodUpdateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CheckoutDeliveryMethodUpdateMutation, CheckoutDeliveryMethodUpdateMutationVariables>(CheckoutDeliveryMethodUpdateDocument, options);
+      }
+export type CheckoutDeliveryMethodUpdateMutationHookResult = ReturnType<typeof useCheckoutDeliveryMethodUpdateMutation>;
+export type CheckoutDeliveryMethodUpdateMutationResult = Apollo.MutationResult<CheckoutDeliveryMethodUpdateMutation>;
+export type CheckoutDeliveryMethodUpdateMutationOptions = Apollo.BaseMutationOptions<CheckoutDeliveryMethodUpdateMutation, CheckoutDeliveryMethodUpdateMutationVariables>;
 export const CheckoutEmailUpdateDocument = gql`
     mutation CheckoutEmailUpdate($token: UUID!, $email: String!, $locale: LanguageCodeEnum!) {
   checkoutEmailUpdate(email: $email, token: $token) {
@@ -30700,6 +31111,25 @@ export type CheckoutCreateFieldPolicy = {
 	created?: FieldPolicy<any> | FieldReadFunction<any>,
 	errors?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type CheckoutCreateFromOrderKeySpecifier = ('checkout' | 'errors' | 'unavailableVariants' | CheckoutCreateFromOrderKeySpecifier)[];
+export type CheckoutCreateFromOrderFieldPolicy = {
+	checkout?: FieldPolicy<any> | FieldReadFunction<any>,
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	unavailableVariants?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type CheckoutCreateFromOrderErrorKeySpecifier = ('code' | 'field' | 'message' | CheckoutCreateFromOrderErrorKeySpecifier)[];
+export type CheckoutCreateFromOrderErrorFieldPolicy = {
+	code?: FieldPolicy<any> | FieldReadFunction<any>,
+	field?: FieldPolicy<any> | FieldReadFunction<any>,
+	message?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type CheckoutCreateFromOrderUnavailableVariantKeySpecifier = ('code' | 'lineId' | 'message' | 'variantId' | CheckoutCreateFromOrderUnavailableVariantKeySpecifier)[];
+export type CheckoutCreateFromOrderUnavailableVariantFieldPolicy = {
+	code?: FieldPolicy<any> | FieldReadFunction<any>,
+	lineId?: FieldPolicy<any> | FieldReadFunction<any>,
+	message?: FieldPolicy<any> | FieldReadFunction<any>,
+	variantId?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type CheckoutCreatedKeySpecifier = ('checkout' | 'issuedAt' | 'issuingPrincipal' | 'recipient' | 'version' | CheckoutCreatedKeySpecifier)[];
 export type CheckoutCreatedFieldPolicy = {
 	checkout?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -31783,11 +32213,13 @@ export type GiftCardUpdatedFieldPolicy = {
 	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
 	version?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type GroupKeySpecifier = ('id' | 'name' | 'permissions' | 'userCanManage' | 'users' | GroupKeySpecifier)[];
+export type GroupKeySpecifier = ('accessibleChannels' | 'id' | 'name' | 'permissions' | 'restrictedAccessToChannels' | 'userCanManage' | 'users' | GroupKeySpecifier)[];
 export type GroupFieldPolicy = {
+	accessibleChannels?: FieldPolicy<any> | FieldReadFunction<any>,
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	permissions?: FieldPolicy<any> | FieldReadFunction<any>,
+	restrictedAccessToChannels?: FieldPolicy<any> | FieldReadFunction<any>,
 	userCanManage?: FieldPolicy<any> | FieldReadFunction<any>,
 	users?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -32148,7 +32580,7 @@ export type MoneyRangeFieldPolicy = {
 	start?: FieldPolicy<any> | FieldReadFunction<any>,
 	stop?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('accountAddressCreate' | 'accountAddressDelete' | 'accountAddressUpdate' | 'accountDelete' | 'accountRegister' | 'accountRequestDeletion' | 'accountSetDefaultAddress' | 'accountUpdate' | 'addressCreate' | 'addressDelete' | 'addressSetDefault' | 'addressUpdate' | 'appActivate' | 'appCreate' | 'appDeactivate' | 'appDelete' | 'appDeleteFailedInstallation' | 'appFetchManifest' | 'appInstall' | 'appRetryInstall' | 'appTokenCreate' | 'appTokenDelete' | 'appTokenVerify' | 'appUpdate' | 'assignNavigation' | 'assignWarehouseShippingZone' | 'attributeBulkDelete' | 'attributeCreate' | 'attributeDelete' | 'attributeReorderValues' | 'attributeTranslate' | 'attributeUpdate' | 'attributeValueBulkDelete' | 'attributeValueCreate' | 'attributeValueDelete' | 'attributeValueTranslate' | 'attributeValueUpdate' | 'categoryBulkDelete' | 'categoryCreate' | 'categoryDelete' | 'categoryTranslate' | 'categoryUpdate' | 'channelActivate' | 'channelCreate' | 'channelDeactivate' | 'channelDelete' | 'channelReorderWarehouses' | 'channelUpdate' | 'checkoutAddPromoCode' | 'checkoutBillingAddressUpdate' | 'checkoutComplete' | 'checkoutCreate' | 'checkoutCustomerAttach' | 'checkoutCustomerDetach' | 'checkoutDeliveryMethodUpdate' | 'checkoutEmailUpdate' | 'checkoutLanguageCodeUpdate' | 'checkoutLineDelete' | 'checkoutLinesAdd' | 'checkoutLinesDelete' | 'checkoutLinesUpdate' | 'checkoutPaymentCreate' | 'checkoutRemovePromoCode' | 'checkoutShippingAddressUpdate' | 'checkoutShippingMethodUpdate' | 'collectionAddProducts' | 'collectionBulkDelete' | 'collectionChannelListingUpdate' | 'collectionCreate' | 'collectionDelete' | 'collectionRemoveProducts' | 'collectionReorderProducts' | 'collectionTranslate' | 'collectionUpdate' | 'confirmAccount' | 'confirmEmailChange' | 'createWarehouse' | 'customerBulkDelete' | 'customerBulkUpdate' | 'customerCreate' | 'customerDelete' | 'customerUpdate' | 'deleteMetadata' | 'deletePrivateMetadata' | 'deleteWarehouse' | 'digitalContentCreate' | 'digitalContentDelete' | 'digitalContentUpdate' | 'digitalContentUrlCreate' | 'draftOrderBulkDelete' | 'draftOrderComplete' | 'draftOrderCreate' | 'draftOrderDelete' | 'draftOrderLinesBulkDelete' | 'draftOrderUpdate' | 'eventDeliveryRetry' | 'exportGiftCards' | 'exportProducts' | 'externalAuthenticationUrl' | 'externalLogout' | 'externalNotificationTrigger' | 'externalObtainAccessTokens' | 'externalRefresh' | 'externalVerify' | 'fileUpload' | 'giftCardActivate' | 'giftCardAddNote' | 'giftCardBulkActivate' | 'giftCardBulkCreate' | 'giftCardBulkDeactivate' | 'giftCardBulkDelete' | 'giftCardCreate' | 'giftCardDeactivate' | 'giftCardDelete' | 'giftCardResend' | 'giftCardSettingsUpdate' | 'giftCardUpdate' | 'invoiceCreate' | 'invoiceDelete' | 'invoiceRequest' | 'invoiceRequestDelete' | 'invoiceSendNotification' | 'invoiceUpdate' | 'menuBulkDelete' | 'menuCreate' | 'menuDelete' | 'menuItemBulkDelete' | 'menuItemCreate' | 'menuItemDelete' | 'menuItemMove' | 'menuItemTranslate' | 'menuItemUpdate' | 'menuUpdate' | 'orderAddNote' | 'orderBulkCancel' | 'orderCancel' | 'orderCapture' | 'orderConfirm' | 'orderCreateFromCheckout' | 'orderDiscountAdd' | 'orderDiscountDelete' | 'orderDiscountUpdate' | 'orderFulfill' | 'orderFulfillmentApprove' | 'orderFulfillmentCancel' | 'orderFulfillmentRefundProducts' | 'orderFulfillmentReturnProducts' | 'orderFulfillmentUpdateTracking' | 'orderGrantRefundCreate' | 'orderGrantRefundUpdate' | 'orderLineDelete' | 'orderLineDiscountRemove' | 'orderLineDiscountUpdate' | 'orderLineUpdate' | 'orderLinesCreate' | 'orderMarkAsPaid' | 'orderRefund' | 'orderSettingsUpdate' | 'orderUpdate' | 'orderUpdateShipping' | 'orderVoid' | 'pageAttributeAssign' | 'pageAttributeUnassign' | 'pageBulkDelete' | 'pageBulkPublish' | 'pageCreate' | 'pageDelete' | 'pageReorderAttributeValues' | 'pageTranslate' | 'pageTypeBulkDelete' | 'pageTypeCreate' | 'pageTypeDelete' | 'pageTypeReorderAttributes' | 'pageTypeUpdate' | 'pageUpdate' | 'passwordChange' | 'paymentCapture' | 'paymentCheckBalance' | 'paymentGatewayInitialize' | 'paymentInitialize' | 'paymentRefund' | 'paymentVoid' | 'permissionGroupCreate' | 'permissionGroupDelete' | 'permissionGroupUpdate' | 'pluginUpdate' | 'productAttributeAssign' | 'productAttributeAssignmentUpdate' | 'productAttributeUnassign' | 'productBulkCreate' | 'productBulkDelete' | 'productChannelListingUpdate' | 'productCreate' | 'productDelete' | 'productMediaBulkDelete' | 'productMediaCreate' | 'productMediaDelete' | 'productMediaReorder' | 'productMediaUpdate' | 'productReorderAttributeValues' | 'productTranslate' | 'productTypeBulkDelete' | 'productTypeCreate' | 'productTypeDelete' | 'productTypeReorderAttributes' | 'productTypeUpdate' | 'productUpdate' | 'productVariantBulkCreate' | 'productVariantBulkDelete' | 'productVariantBulkUpdate' | 'productVariantChannelListingUpdate' | 'productVariantCreate' | 'productVariantDelete' | 'productVariantPreorderDeactivate' | 'productVariantReorder' | 'productVariantReorderAttributeValues' | 'productVariantSetDefault' | 'productVariantStocksCreate' | 'productVariantStocksDelete' | 'productVariantStocksUpdate' | 'productVariantTranslate' | 'productVariantUpdate' | 'requestEmailChange' | 'requestPasswordReset' | 'saleBulkDelete' | 'saleCataloguesAdd' | 'saleCataloguesRemove' | 'saleChannelListingUpdate' | 'saleCreate' | 'saleDelete' | 'saleTranslate' | 'saleUpdate' | 'setPassword' | 'shippingMethodChannelListingUpdate' | 'shippingPriceBulkDelete' | 'shippingPriceCreate' | 'shippingPriceDelete' | 'shippingPriceExcludeProducts' | 'shippingPriceRemoveProductFromExclude' | 'shippingPriceTranslate' | 'shippingPriceUpdate' | 'shippingZoneBulkDelete' | 'shippingZoneCreate' | 'shippingZoneDelete' | 'shippingZoneUpdate' | 'shopAddressUpdate' | 'shopDomainUpdate' | 'shopFetchTaxRates' | 'shopSettingsTranslate' | 'shopSettingsUpdate' | 'staffBulkDelete' | 'staffCreate' | 'staffDelete' | 'staffNotificationRecipientCreate' | 'staffNotificationRecipientDelete' | 'staffNotificationRecipientUpdate' | 'staffUpdate' | 'stockBulkUpdate' | 'taxClassCreate' | 'taxClassDelete' | 'taxClassUpdate' | 'taxConfigurationUpdate' | 'taxCountryConfigurationDelete' | 'taxCountryConfigurationUpdate' | 'taxExemptionManage' | 'tokenCreate' | 'tokenRefresh' | 'tokenVerify' | 'tokensDeactivateAll' | 'transactionCreate' | 'transactionEventReport' | 'transactionInitialize' | 'transactionProcess' | 'transactionRequestAction' | 'transactionUpdate' | 'unassignWarehouseShippingZone' | 'updateMetadata' | 'updatePrivateMetadata' | 'updateWarehouse' | 'userAvatarDelete' | 'userAvatarUpdate' | 'userBulkSetActive' | 'variantMediaAssign' | 'variantMediaUnassign' | 'voucherBulkDelete' | 'voucherCataloguesAdd' | 'voucherCataloguesRemove' | 'voucherChannelListingUpdate' | 'voucherCreate' | 'voucherDelete' | 'voucherTranslate' | 'voucherUpdate' | 'webhookCreate' | 'webhookDelete' | 'webhookDryRun' | 'webhookTrigger' | 'webhookUpdate' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('accountAddressCreate' | 'accountAddressDelete' | 'accountAddressUpdate' | 'accountDelete' | 'accountRegister' | 'accountRequestDeletion' | 'accountSetDefaultAddress' | 'accountUpdate' | 'addressCreate' | 'addressDelete' | 'addressSetDefault' | 'addressUpdate' | 'appActivate' | 'appCreate' | 'appDeactivate' | 'appDelete' | 'appDeleteFailedInstallation' | 'appFetchManifest' | 'appInstall' | 'appRetryInstall' | 'appTokenCreate' | 'appTokenDelete' | 'appTokenVerify' | 'appUpdate' | 'assignNavigation' | 'assignWarehouseShippingZone' | 'attributeBulkDelete' | 'attributeCreate' | 'attributeDelete' | 'attributeReorderValues' | 'attributeTranslate' | 'attributeUpdate' | 'attributeValueBulkDelete' | 'attributeValueCreate' | 'attributeValueDelete' | 'attributeValueTranslate' | 'attributeValueUpdate' | 'categoryBulkDelete' | 'categoryCreate' | 'categoryDelete' | 'categoryTranslate' | 'categoryUpdate' | 'channelActivate' | 'channelCreate' | 'channelDeactivate' | 'channelDelete' | 'channelReorderWarehouses' | 'channelUpdate' | 'checkoutAddPromoCode' | 'checkoutBillingAddressUpdate' | 'checkoutComplete' | 'checkoutCreate' | 'checkoutCreateFromOrder' | 'checkoutCustomerAttach' | 'checkoutCustomerDetach' | 'checkoutDeliveryMethodUpdate' | 'checkoutEmailUpdate' | 'checkoutLanguageCodeUpdate' | 'checkoutLineDelete' | 'checkoutLinesAdd' | 'checkoutLinesDelete' | 'checkoutLinesUpdate' | 'checkoutPaymentCreate' | 'checkoutRemovePromoCode' | 'checkoutShippingAddressUpdate' | 'checkoutShippingMethodUpdate' | 'collectionAddProducts' | 'collectionBulkDelete' | 'collectionChannelListingUpdate' | 'collectionCreate' | 'collectionDelete' | 'collectionRemoveProducts' | 'collectionReorderProducts' | 'collectionTranslate' | 'collectionUpdate' | 'confirmAccount' | 'confirmEmailChange' | 'createWarehouse' | 'customerBulkDelete' | 'customerBulkUpdate' | 'customerCreate' | 'customerDelete' | 'customerUpdate' | 'deleteMetadata' | 'deletePrivateMetadata' | 'deleteWarehouse' | 'digitalContentCreate' | 'digitalContentDelete' | 'digitalContentUpdate' | 'digitalContentUrlCreate' | 'draftOrderBulkDelete' | 'draftOrderComplete' | 'draftOrderCreate' | 'draftOrderDelete' | 'draftOrderLinesBulkDelete' | 'draftOrderUpdate' | 'eventDeliveryRetry' | 'exportGiftCards' | 'exportProducts' | 'externalAuthenticationUrl' | 'externalLogout' | 'externalNotificationTrigger' | 'externalObtainAccessTokens' | 'externalRefresh' | 'externalVerify' | 'fileUpload' | 'giftCardActivate' | 'giftCardAddNote' | 'giftCardBulkActivate' | 'giftCardBulkCreate' | 'giftCardBulkDeactivate' | 'giftCardBulkDelete' | 'giftCardCreate' | 'giftCardDeactivate' | 'giftCardDelete' | 'giftCardResend' | 'giftCardSettingsUpdate' | 'giftCardUpdate' | 'invoiceCreate' | 'invoiceDelete' | 'invoiceRequest' | 'invoiceRequestDelete' | 'invoiceSendNotification' | 'invoiceUpdate' | 'menuBulkDelete' | 'menuCreate' | 'menuDelete' | 'menuItemBulkDelete' | 'menuItemCreate' | 'menuItemDelete' | 'menuItemMove' | 'menuItemTranslate' | 'menuItemUpdate' | 'menuUpdate' | 'orderAddNote' | 'orderBulkCancel' | 'orderCancel' | 'orderCapture' | 'orderConfirm' | 'orderCreateFromCheckout' | 'orderDiscountAdd' | 'orderDiscountDelete' | 'orderDiscountUpdate' | 'orderFulfill' | 'orderFulfillmentApprove' | 'orderFulfillmentCancel' | 'orderFulfillmentRefundProducts' | 'orderFulfillmentReturnProducts' | 'orderFulfillmentUpdateTracking' | 'orderGrantRefundCreate' | 'orderGrantRefundUpdate' | 'orderLineDelete' | 'orderLineDiscountRemove' | 'orderLineDiscountUpdate' | 'orderLineUpdate' | 'orderLinesCreate' | 'orderMarkAsPaid' | 'orderRefund' | 'orderSettingsUpdate' | 'orderUpdate' | 'orderUpdateShipping' | 'orderVoid' | 'pageAttributeAssign' | 'pageAttributeUnassign' | 'pageBulkDelete' | 'pageBulkPublish' | 'pageCreate' | 'pageDelete' | 'pageReorderAttributeValues' | 'pageTranslate' | 'pageTypeBulkDelete' | 'pageTypeCreate' | 'pageTypeDelete' | 'pageTypeReorderAttributes' | 'pageTypeUpdate' | 'pageUpdate' | 'passwordChange' | 'paymentCapture' | 'paymentCheckBalance' | 'paymentGatewayInitialize' | 'paymentInitialize' | 'paymentRefund' | 'paymentVoid' | 'permissionGroupCreate' | 'permissionGroupDelete' | 'permissionGroupUpdate' | 'pluginUpdate' | 'productAttributeAssign' | 'productAttributeAssignmentUpdate' | 'productAttributeUnassign' | 'productBulkCreate' | 'productBulkDelete' | 'productChannelListingUpdate' | 'productCreate' | 'productDelete' | 'productMediaBulkDelete' | 'productMediaCreate' | 'productMediaDelete' | 'productMediaReorder' | 'productMediaUpdate' | 'productReorderAttributeValues' | 'productTranslate' | 'productTypeBulkDelete' | 'productTypeCreate' | 'productTypeDelete' | 'productTypeReorderAttributes' | 'productTypeUpdate' | 'productUpdate' | 'productVariantBulkCreate' | 'productVariantBulkDelete' | 'productVariantBulkUpdate' | 'productVariantChannelListingUpdate' | 'productVariantCreate' | 'productVariantDelete' | 'productVariantPreorderDeactivate' | 'productVariantReorder' | 'productVariantReorderAttributeValues' | 'productVariantSetDefault' | 'productVariantStocksCreate' | 'productVariantStocksDelete' | 'productVariantStocksUpdate' | 'productVariantTranslate' | 'productVariantUpdate' | 'requestEmailChange' | 'requestPasswordReset' | 'saleBulkDelete' | 'saleCataloguesAdd' | 'saleCataloguesRemove' | 'saleChannelListingUpdate' | 'saleCreate' | 'saleDelete' | 'saleTranslate' | 'saleUpdate' | 'setPassword' | 'shippingMethodChannelListingUpdate' | 'shippingPriceBulkDelete' | 'shippingPriceCreate' | 'shippingPriceDelete' | 'shippingPriceExcludeProducts' | 'shippingPriceRemoveProductFromExclude' | 'shippingPriceTranslate' | 'shippingPriceUpdate' | 'shippingZoneBulkDelete' | 'shippingZoneCreate' | 'shippingZoneDelete' | 'shippingZoneUpdate' | 'shopAddressUpdate' | 'shopDomainUpdate' | 'shopFetchTaxRates' | 'shopSettingsTranslate' | 'shopSettingsUpdate' | 'staffBulkDelete' | 'staffCreate' | 'staffDelete' | 'staffNotificationRecipientCreate' | 'staffNotificationRecipientDelete' | 'staffNotificationRecipientUpdate' | 'staffUpdate' | 'stockBulkUpdate' | 'taxClassCreate' | 'taxClassDelete' | 'taxClassUpdate' | 'taxConfigurationUpdate' | 'taxCountryConfigurationDelete' | 'taxCountryConfigurationUpdate' | 'taxExemptionManage' | 'tokenCreate' | 'tokenRefresh' | 'tokenVerify' | 'tokensDeactivateAll' | 'transactionCreate' | 'transactionEventReport' | 'transactionInitialize' | 'transactionProcess' | 'transactionRequestAction' | 'transactionUpdate' | 'unassignWarehouseShippingZone' | 'updateMetadata' | 'updatePrivateMetadata' | 'updateWarehouse' | 'userAvatarDelete' | 'userAvatarUpdate' | 'userBulkSetActive' | 'variantMediaAssign' | 'variantMediaUnassign' | 'voucherBulkDelete' | 'voucherCataloguesAdd' | 'voucherCataloguesRemove' | 'voucherChannelListingUpdate' | 'voucherCreate' | 'voucherDelete' | 'voucherTranslate' | 'voucherUpdate' | 'webhookCreate' | 'webhookDelete' | 'webhookDryRun' | 'webhookTrigger' | 'webhookUpdate' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	accountAddressCreate?: FieldPolicy<any> | FieldReadFunction<any>,
 	accountAddressDelete?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -32202,6 +32634,7 @@ export type MutationFieldPolicy = {
 	checkoutBillingAddressUpdate?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkoutComplete?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkoutCreate?: FieldPolicy<any> | FieldReadFunction<any>,
+	checkoutCreateFromOrder?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkoutCustomerAttach?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkoutCustomerDetach?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkoutDeliveryMethodUpdate?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -32758,6 +33191,14 @@ export type OrderFullyPaidFieldPolicy = {
 	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
 	version?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type OrderFullyRefundedKeySpecifier = ('issuedAt' | 'issuingPrincipal' | 'order' | 'recipient' | 'version' | OrderFullyRefundedKeySpecifier)[];
+export type OrderFullyRefundedFieldPolicy = {
+	issuedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	issuingPrincipal?: FieldPolicy<any> | FieldReadFunction<any>,
+	order?: FieldPolicy<any> | FieldReadFunction<any>,
+	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
+	version?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type OrderGrantRefundCreateKeySpecifier = ('errors' | 'grantedRefund' | 'order' | OrderGrantRefundCreateKeySpecifier)[];
 export type OrderGrantRefundCreateFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -32878,11 +33319,27 @@ export type OrderMetadataUpdatedFieldPolicy = {
 	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
 	version?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type OrderPaidKeySpecifier = ('issuedAt' | 'issuingPrincipal' | 'order' | 'recipient' | 'version' | OrderPaidKeySpecifier)[];
+export type OrderPaidFieldPolicy = {
+	issuedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	issuingPrincipal?: FieldPolicy<any> | FieldReadFunction<any>,
+	order?: FieldPolicy<any> | FieldReadFunction<any>,
+	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
+	version?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type OrderRefundKeySpecifier = ('errors' | 'order' | 'orderErrors' | OrderRefundKeySpecifier)[];
 export type OrderRefundFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	order?: FieldPolicy<any> | FieldReadFunction<any>,
 	orderErrors?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type OrderRefundedKeySpecifier = ('issuedAt' | 'issuingPrincipal' | 'order' | 'recipient' | 'version' | OrderRefundedKeySpecifier)[];
+export type OrderRefundedFieldPolicy = {
+	issuedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	issuingPrincipal?: FieldPolicy<any> | FieldReadFunction<any>,
+	order?: FieldPolicy<any> | FieldReadFunction<any>,
+	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
+	version?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type OrderSettingsKeySpecifier = ('automaticallyConfirmAllNewOrders' | 'automaticallyFulfillNonShippableGiftCard' | 'defaultTransactionFlowStrategy' | 'expireOrdersAfter' | 'markAsPaidStrategy' | OrderSettingsKeySpecifier)[];
 export type OrderSettingsFieldPolicy = {
@@ -33382,8 +33839,9 @@ export type PermissionGroupDeletedFieldPolicy = {
 	recipient?: FieldPolicy<any> | FieldReadFunction<any>,
 	version?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PermissionGroupErrorKeySpecifier = ('code' | 'field' | 'message' | 'permissions' | 'users' | PermissionGroupErrorKeySpecifier)[];
+export type PermissionGroupErrorKeySpecifier = ('channels' | 'code' | 'field' | 'message' | 'permissions' | 'users' | PermissionGroupErrorKeySpecifier)[];
 export type PermissionGroupErrorFieldPolicy = {
+	channels?: FieldPolicy<any> | FieldReadFunction<any>,
 	code?: FieldPolicy<any> | FieldReadFunction<any>,
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -33893,7 +34351,7 @@ export type ProductVariantBulkDeleteFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	productErrors?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type ProductVariantBulkErrorKeySpecifier = ('attributes' | 'channelListings' | 'channels' | 'code' | 'field' | 'message' | 'stocks' | 'values' | 'warehouses' | ProductVariantBulkErrorKeySpecifier)[];
+export type ProductVariantBulkErrorKeySpecifier = ('attributes' | 'channelListings' | 'channels' | 'code' | 'field' | 'message' | 'path' | 'stocks' | 'values' | 'warehouses' | ProductVariantBulkErrorKeySpecifier)[];
 export type ProductVariantBulkErrorFieldPolicy = {
 	attributes?: FieldPolicy<any> | FieldReadFunction<any>,
 	channelListings?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -33901,6 +34359,7 @@ export type ProductVariantBulkErrorFieldPolicy = {
 	code?: FieldPolicy<any> | FieldReadFunction<any>,
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>,
+	path?: FieldPolicy<any> | FieldReadFunction<any>,
 	stocks?: FieldPolicy<any> | FieldReadFunction<any>,
 	values?: FieldPolicy<any> | FieldReadFunction<any>,
 	warehouses?: FieldPolicy<any> | FieldReadFunction<any>
@@ -35277,8 +35736,9 @@ export type UploadErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('addresses' | 'avatar' | 'checkout' | 'checkoutIds' | 'checkoutTokens' | 'checkouts' | 'dateJoined' | 'defaultBillingAddress' | 'defaultShippingAddress' | 'editableGroups' | 'email' | 'events' | 'externalReference' | 'firstName' | 'giftCards' | 'id' | 'isActive' | 'isStaff' | 'languageCode' | 'lastLogin' | 'lastName' | 'metadata' | 'metafield' | 'metafields' | 'note' | 'orders' | 'permissionGroups' | 'privateMetadata' | 'privateMetafield' | 'privateMetafields' | 'storedPaymentSources' | 'updatedAt' | 'userPermissions' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('accessibleChannels' | 'addresses' | 'avatar' | 'checkout' | 'checkoutIds' | 'checkoutTokens' | 'checkouts' | 'dateJoined' | 'defaultBillingAddress' | 'defaultShippingAddress' | 'editableGroups' | 'email' | 'events' | 'externalReference' | 'firstName' | 'giftCards' | 'id' | 'isActive' | 'isStaff' | 'languageCode' | 'lastLogin' | 'lastName' | 'metadata' | 'metafield' | 'metafields' | 'note' | 'orders' | 'permissionGroups' | 'privateMetadata' | 'privateMetafield' | 'privateMetafields' | 'restrictedAccessToChannels' | 'storedPaymentSources' | 'updatedAt' | 'userPermissions' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
+	accessibleChannels?: FieldPolicy<any> | FieldReadFunction<any>,
 	addresses?: FieldPolicy<any> | FieldReadFunction<any>,
 	avatar?: FieldPolicy<any> | FieldReadFunction<any>,
 	checkout?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -35309,6 +35769,7 @@ export type UserFieldPolicy = {
 	privateMetadata?: FieldPolicy<any> | FieldReadFunction<any>,
 	privateMetafield?: FieldPolicy<any> | FieldReadFunction<any>,
 	privateMetafields?: FieldPolicy<any> | FieldReadFunction<any>,
+	restrictedAccessToChannels?: FieldPolicy<any> | FieldReadFunction<any>,
 	storedPaymentSources?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	userPermissions?: FieldPolicy<any> | FieldReadFunction<any>
@@ -36161,6 +36622,18 @@ export type StrictTypedTypePolicies = {
 	CheckoutCreate?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CheckoutCreateKeySpecifier | (() => undefined | CheckoutCreateKeySpecifier),
 		fields?: CheckoutCreateFieldPolicy,
+	},
+	CheckoutCreateFromOrder?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CheckoutCreateFromOrderKeySpecifier | (() => undefined | CheckoutCreateFromOrderKeySpecifier),
+		fields?: CheckoutCreateFromOrderFieldPolicy,
+	},
+	CheckoutCreateFromOrderError?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CheckoutCreateFromOrderErrorKeySpecifier | (() => undefined | CheckoutCreateFromOrderErrorKeySpecifier),
+		fields?: CheckoutCreateFromOrderErrorFieldPolicy,
+	},
+	CheckoutCreateFromOrderUnavailableVariant?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CheckoutCreateFromOrderUnavailableVariantKeySpecifier | (() => undefined | CheckoutCreateFromOrderUnavailableVariantKeySpecifier),
+		fields?: CheckoutCreateFromOrderUnavailableVariantFieldPolicy,
 	},
 	CheckoutCreated?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CheckoutCreatedKeySpecifier | (() => undefined | CheckoutCreatedKeySpecifier),
@@ -37082,6 +37555,10 @@ export type StrictTypedTypePolicies = {
 		keyFields?: false | OrderFullyPaidKeySpecifier | (() => undefined | OrderFullyPaidKeySpecifier),
 		fields?: OrderFullyPaidFieldPolicy,
 	},
+	OrderFullyRefunded?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | OrderFullyRefundedKeySpecifier | (() => undefined | OrderFullyRefundedKeySpecifier),
+		fields?: OrderFullyRefundedFieldPolicy,
+	},
 	OrderGrantRefundCreate?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | OrderGrantRefundCreateKeySpecifier | (() => undefined | OrderGrantRefundCreateKeySpecifier),
 		fields?: OrderGrantRefundCreateFieldPolicy,
@@ -37134,9 +37611,17 @@ export type StrictTypedTypePolicies = {
 		keyFields?: false | OrderMetadataUpdatedKeySpecifier | (() => undefined | OrderMetadataUpdatedKeySpecifier),
 		fields?: OrderMetadataUpdatedFieldPolicy,
 	},
+	OrderPaid?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | OrderPaidKeySpecifier | (() => undefined | OrderPaidKeySpecifier),
+		fields?: OrderPaidFieldPolicy,
+	},
 	OrderRefund?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | OrderRefundKeySpecifier | (() => undefined | OrderRefundKeySpecifier),
 		fields?: OrderRefundFieldPolicy,
+	},
+	OrderRefunded?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | OrderRefundedKeySpecifier | (() => undefined | OrderRefundedKeySpecifier),
+		fields?: OrderRefundedFieldPolicy,
 	},
 	OrderSettings?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | OrderSettingsKeySpecifier | (() => undefined | OrderSettingsKeySpecifier),

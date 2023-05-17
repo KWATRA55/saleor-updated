@@ -6,7 +6,7 @@ function CheckoutForm() {
 
 const products = JSON.parse(Router.query.data);
 
-const [Ctoken, setCtoken] = useState();
+// const [Ctoken, setCtoken] = useState();
 
 const initialCheckoutValues = {                
     email: '',
@@ -60,9 +60,14 @@ const handleButtonClick = async () => {
       console.log('Mutation result:', result);
       const ctoken = result?.data?.checkoutCreate?.checkout?.token;
       console.log(ctoken);
- 
 
-      let shippingResult = await shippingFunc(ctoken);
+      if(ctoken !== null){
+        Router.push(
+          { pathname: "/shippingmethod", query: { data : JSON.stringify(ctoken) } },
+          "/shippingmethod"
+        );
+      }
+ 
 
 };
   return (
