@@ -33,6 +33,7 @@ interface Props {
 export const ProductDetails = ({ product }: Props) => {
   const router = useRouter();
   const [token] = useLocalStorage('token');
+  console.log("checkout token : ", token);
   const [addProductToCart] = useProductAddVariantToCartMutation();
 
   const queryVariant = process.browser

@@ -14,6 +14,7 @@ export const ProductCollection = () => {
     },
   });
 
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error</p>;
 
