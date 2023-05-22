@@ -1,12 +1,14 @@
 import { useShippingMethodQuery, useTestMutation } from '@/saleor/api';
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Router from 'next/router';
+import AuthContext from '../../context/AuthProvider';
 
 function CheckoutForm() {
 
 const products = JSON.parse(Router.query.data);
 
 // const [Ctoken, setCtoken] = useState();
+const {auth, setAuth} = useContext(AuthContext);
 
 const initialCheckoutValues = {                
     email: '',
@@ -23,14 +25,14 @@ const initialCheckoutValues = {
 
 const [values, setValues] = useState(initialCheckoutValues);  
 
-const shippingFunc = async (ctoken) => {
-  const {loading, error, data } = await useShippingMethodQuery({
-    variables : {
-      'ctoken' : ctoken
-    }
-  })
-  console.log(data);
-}
+// const shippingFunc = async (ctoken) => {
+//   const {loading, error, data } = await useShippingMethodQuery({
+//     variables : {
+//       'ctoken' : ctoken
+//     }
+//   })
+//   console.log(data);
+// }
 
 const handleChange = (e) => {                
   setValues({
@@ -60,6 +62,10 @@ const handleButtonClick = async () => {
       console.log('Mutation result:', result);
       const ctoken = result?.data?.checkoutCreate?.checkout?.token;
       console.log(ctoken);
+      localStorage.setItem('ctoken', ctoken);
+
+      const updatedAuth = { ...auth, ctoken: ctoken };
+      setAuth(updatedAuth);
 
       if(ctoken !== null){
         Router.push(

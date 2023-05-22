@@ -29,8 +29,7 @@ export default function Login() {
   const {auth, setAuth} = useContext(AuthContext);
 
 
-  const [login, { loading, error }] =
-  useLoginMutation();
+  const [login, { loading, error }] = useLoginMutation();
 
 
   const handleClick = async () => {
@@ -105,6 +104,15 @@ export default function Login() {
       }
     }, [hasError]);
 
+    useEffect(() => {
+      if(Router.query.status){
+        setSuccess(true);
+      }
+      setTimeout(() => {
+        setSuccess(false);
+      }, 5000);
+    }, [])
+
       // var requestOptions = {
       //   method: 'POST',
       //   headers: myHeaders,
@@ -137,6 +145,9 @@ export default function Login() {
 
   return (
     <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'90vh'}}>
+
+      <div>
+      {success ? <h3 style={{color : "green"}}>Account created successfully!</h3> : null}
       
       <Form style={{ width:'35vw', border:'solid 1px gray', padding:'3vh'}}>
         
@@ -168,6 +179,7 @@ export default function Login() {
         <a href='/register' style={{textDecoration:'none'}}>Register here, If you don't have an account</a>
       </div>
     </Form>
+      </div>
     </div>
   );
 }

@@ -1,15 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext  } from "react";
 import { useCheckoutDeliveryMethodUpdateMutation } from "@/saleor/api";
 import Router from "next/router";
 
 
 function selectmethod() {
-  const { ctoken, dID } = Router.query;
+  //const { ctoken, dID } = Router.query;
+  //console.log("ctoken from global state : ", auth.ctoken)
+
+  const ctoken = localStorage.getItem("ctoken");
+  const dID = localStorage.getItem("dID");
+
   console.log("ctoken : ", ctoken);
   console.log("dID : ", dID);
 
-  const [checkoutDeliveryMethodUpdate, { loading, error }] =
-  useCheckoutDeliveryMethodUpdateMutation();
+  const [checkoutDeliveryMethodUpdate, { loading, error }] = useCheckoutDeliveryMethodUpdateMutation();
 
   useEffect(() => {
     const updateDeliveryMethod = async () => {
@@ -31,7 +35,7 @@ function selectmethod() {
     };
 
     updateDeliveryMethod();
-  }, [checkoutDeliveryMethodUpdate, ctoken, dID]);
+  }, []);
 
 
   return <div>select method</div>;

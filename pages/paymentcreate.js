@@ -3,7 +3,8 @@ import { useCheckoutPaymentCreateMutation } from '@/saleor/api';
 import Router from "next/router";
 
 function payment() {
-  const {ctoken} = Router.query;
+  //const {ctoken} = Router.query;
+  const ctoken = localStorage.getItem("ctoken");
   console.log(ctoken);
 
   const [checkoutPaymentCreate, { loading, error }] = useCheckoutPaymentCreateMutation();

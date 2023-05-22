@@ -34,7 +34,7 @@ export default function JoinOurTeam() {
           console.log("Signup data: ", data);
   
           if (data.accountRegister.user !== null) {
-            Router.push({ pathname: "/login" }, "/login");
+            Router.push({ pathname: "/login" ,  query: { status : true }}, "/login");
           }
       }
       catch(err){
